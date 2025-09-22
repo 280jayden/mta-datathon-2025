@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
-from sodapy import Socrata
 
-client = Socrata("data.ny.gov", None)
+def main():
+    df = pd.DataFrame(data)
 
-results = client.get("khy8p-hchm", limit=2000)
+if __name__ == "__main__":
+    main()
 
-results_df = pd.DataFrame.from_records(results)
+
+
 
