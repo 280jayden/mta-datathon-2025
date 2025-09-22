@@ -1,0 +1,7 @@
+# Ignore large raw files
+data_raw/
+*.csv
+
+# Python cache
+__pycache__/
+*.pyc
