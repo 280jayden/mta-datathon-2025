@@ -125,7 +125,66 @@ def plot_q2():
     HeatMap(df_repeat_exempt_after[['violation_latitude','violation_longitude']].values.tolist(), radius=8, blur=15).add_to(m_after)
     m_after.save("data/repeat_heatmap_after.html")
 
+def DiD():
+    df = pd.read_csv("data/violations_sample.csv")
+    bus_routes = pd.read_csv("data/data.csv")
+
+    # converts bus route - implementation date dataframe to a dictionary
+    bus_implementation = bus_routes.set_index('route')['implementation_date'].to_dict()
+
+    # converts to datetime
+    df['first_occurrence'] = pd.to_datetime(df['first_occurrence'])
+    bus_implementation = {k: pd.to_datetime(v) for k, v in bus_implementation.items()}
+
+
+    df['timeframe'] = df.apply(
+        lambda row: 'before' if row['first_occurrence'] < bus_implementation.get(row['bus_route_id'], pd.Timestamp.max) else 'after',
+        axis=1
+    )
+
+    # treated = has camera enforcement on route
+    df['treated'] = df['bus_route_id'].isin(bus_implementation.keys())
+
+    cutoff = pd.Timestamp("2025-01-05 00:00:00")
+
+    # cbd = congestion pricing policy
+    df['is_after'] = df['first_occurrence'] >= cutoff
+    df['is_after'] = df['first_occurrence'] >= cutoff
+
+    treated_before = df[(df['treated']) & (~df['is_after'])]
+    treated_after  = df[(df['treated']) & (df['is_after'])]
+
+    control_before = df[(~df['treated']) & (~df['is_after'])]
+    control_after  = df[(~df['treated']) & (df['is_after'])]
+
+    tb_daily = treated_before.groupby(treated_before['first_occurrence'].dt.date).size()
+    ta_daily = treated_after.groupby(treated_after['first_occurrence'].dt.date).size()
+    cb_daily = control_before.groupby(control_before['first_occurrence'].dt.date).size()
+    ca_daily = control_after.groupby(control_after['first_occurrence'].dt.date).size()
+
+    # Means
+    tb_mean = tb_daily.mean()
+    ta_mean = ta_daily.mean()
+    cb_mean = cb_daily.mean()
+    ca_mean = ca_daily.mean()
+
+    treated_change = ta_daily.values - tb_daily.values[:len(ta_daily)]  # align lengths if needed
+    control_change = ca_daily.values - cb_daily.values[:len(ca_daily)]
+
+    DiD = (ta_mean - tb_mean) - (ca_mean - cb_mean)
+
+    print("DiD estimate (effect of cameras):", DiD)
+    t_stat, p_value = ttest_ind(treated_change, control_change, equal_var=False)
+    print("T-statistic:", t_stat)
+    print("P-value:", p_value)
+
+    # This DiD and T-test reported an increase of 60 violations on
+    # average per day when going from before the congestion policy enforcement
+    # This was calculated at a p-value = 1e-114 << 0.05, so this is statistically
+    # significant to conclude that there was an increase in violations
+    # after the ACE camera enforcement. Maybe just due to the increase
+    # cameras, more violations were reported, which means there would
+    # survivorship bias.
+
 if __name__ == "__main__":
-    plot_q2()
-
-
+    DiD()
