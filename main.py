@@ -94,9 +94,38 @@ def analyze():
     top_increase = grid_comparison.sort_values('diff', ascending=True).head(10)
     print(top_increase)
 
+# plots the repeat exempt violation offenders' locations
+def plot_q2():
+    df_before = pd.read_csv("data/violations_before_01052025.csv")
+    df_after = pd.read_csv("data/violations_after_01052025.csv")
+
+    df_before['violation_status'] = df_before['violation_status'].str.upper()
+    df_after['violation_status'] = df_after['violation_status'].str.upper()
+
+    exempt_before = df_before[df_before['violation_status'].str.contains("EXEMPT")]
+    exempt_after = df_after[df_after['violation_status'].str.contains("EXEMPT")]
+
+    exempt_before['is_repeat_offender'] = exempt_before['first_occurrence'] != exempt_before['last_occurrence']
+    exempt_after['is_repeat_offender'] = exempt_after['first_occurrence'] != exempt_after['last_occurrence']
+
+    # repeat exempt violators before congestion pricing
+    df_repeat_exempt_before = exempt_before[exempt_before['is_repeat_offender']]
+    # repeat exempt violators after congestion pricing
+    df_repeat_exempt_after = exempt_after[exempt_after['is_repeat_offender']]
+
+    center = [df_before['violation_latitude'].mean(), df_before['violation_longitude'].mean()]
+
+    # heatmap before cutoff
+    m_before = folium.Map(location=center, zoom_start=12)
+    HeatMap(df_repeat_exempt_before[['violation_latitude','violation_longitude']].values.tolist(), radius=8, blur=15).add_to(m_before)
+    m_before.save("data/repeat_heatmap_before.html")
+
+    # heatmap after cutoff
+    m_after = folium.Map(location=center, zoom_start=12)
+    HeatMap(df_repeat_exempt_after[['violation_latitude','violation_longitude']].values.tolist(), radius=8, blur=15).add_to(m_after)
+    m_after.save("data/repeat_heatmap_after.html")
+
 if __name__ == "__main__":
-    analyze()
-
-
+    plot_q2()
 
 
