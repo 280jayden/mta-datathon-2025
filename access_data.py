@@ -18,7 +18,6 @@ def fetch_by_chunk(name,url,chunk_size=1000):
     all_data=[]
 
     while url:
-        batch_url=f"{url}?$top={chunk_size}&$skip={skip}"
         for _ in range(3):
             try:
                 response = requests.get(url, timeout=10)
@@ -31,9 +30,6 @@ def fetch_by_chunk(name,url,chunk_size=1000):
         rows = data.get("value",[])
         if not rows:
             break
-
-        if url is None and len(rows) == chunk_size:
-            url = batch_url
 
         time.sleep(0.1)
 

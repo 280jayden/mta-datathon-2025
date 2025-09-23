@@ -1,5 +1,6 @@
 venv/
 data/
+plots/
 # Ignore large raw files
 data_raw/
 *.csv
