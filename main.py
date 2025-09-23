@@ -34,20 +34,41 @@ def get_samples():
     speeds_2025_sample.to_csv("data/speeds_2025_sample.csv",index=False)
     speeds_2023_24_sample.to_csv("data/speeds_2023_24_sample.csv",index=False)
 
+# separates violation sample into before/after congestion policy
+# then plots it
 def plot():
 
-    sample_df = pd.read_csv("data/violations_sample.csv")
+    cutoff = pd.Timestamp("2025-01-05 00:00:00")
+
+    df = pd.read_csv("data/violations_sample.csv", parse_dates=["first_occurrence"])
+
+    df['first_occurrence'] = pd.to_datetime(df['first_occurrence'], unit='s', errors='coerce')
+    df_before = df[df['first_occurrence'] < cutoff]
+
+    df_after = df[df['first_occurrence'] >= cutoff]
 
     m = folium.Map(
-        location=[sample_df['violation_latitude'].mean(),sample_df['violation_longitude'].mean()],
+        location=[df['violation_latitude'].mean(),df['violation_longitude'].mean()],
         zoom_start=12
     )
 
-    heat_data = sample_df[['violation_latitude','violation_longitude']].dropna().values.tolist()
+    l = folium.Map(
+        location=[df['violation_latitude'].mean(),df['violation_longitude'].mean()],
+        zoom_start=12
+    )
 
-    HeatMap(heat_data,radius=8,blue=15).add_to(m)
+    df_before.to_csv("data/violations_before_01052025.csv",index=False)
+    df_after.to_csv("data/violations_after_01052025.csv",index=False)
 
-    m.save("data/violations_heatmap.html")
+    heat_data_m = df_before[['violation_latitude','violation_longitude']].dropna().values.tolist()
+    heat_data_l = df_after[['violation_latitude','violation_longitude']].dropna().values.tolist()
+
+
+    HeatMap(heat_data_m,radius=8,blue=15).add_to(m)
+    HeatMap(heat_data_l,radius=8,blue=15).add_to(l)
+
+    m.save("data/violations__before_heatmap.html")
+    l.save("data/violations__after_heatmap.html")
 
 
 if __name__ == "__main__":
