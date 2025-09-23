@@ -3,6 +3,7 @@ import numpy as np
 import plotly.express as px
 import folium
 from folium.plugins import HeatMap
+from scipy.stats import ttest_ind
 
 # Datathon business questions:
 
@@ -70,9 +71,31 @@ def plot():
     m.save("data/violations__before_heatmap.html")
     l.save("data/violations__after_heatmap.html")
 
+# does a spatial analysis on before/after congestion pricing
+def analyze():
+    df_before = pd.read_csv("data/violations_before_01052025.csv")
+    df_after = pd.read_csv("data/violations_after_01052025.csv")
+    
+    # round to ~1km grid
+    df_before['lat_grid'] = df_before['violation_latitude'].round(3)
+    df_before['lon_grid'] = df_before['violation_longitude'].round(3)
+
+    df_after['lat_grid'] = df_after['violation_latitude'].round(3)
+    df_after['lon_grid'] = df_after['violation_longitude'].round(3)
+
+    grid_before = df_before.groupby(['lat_grid', 'lon_grid']).size().reset_index(name='violations')
+    grid_after = df_after.groupby(['lat_grid', 'lon_grid']).size().reset_index(name='violations')
+
+    grid_comparison = pd.merge(grid_before, grid_after, on=['lat_grid','lon_grid'], how='outer', suffixes=('_before','_after')).fillna(0)
+
+    grid_comparison['diff'] = grid_comparison['violations_after'] - grid_comparison['violations_before']
+
+    # Top 10 hotspot changes in before/after
+    top_increase = grid_comparison.sort_values('diff', ascending=True).head(10)
+    print(top_increase)
 
 if __name__ == "__main__":
-    plot()
+    analyze()
 
 
 
