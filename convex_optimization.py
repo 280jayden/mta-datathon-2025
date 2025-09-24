@@ -140,3 +140,37 @@ def calculate():
 
 if __name__ == "__main__":
     calculate()
+
+# Findings from convex optimization
+
+# By assuming a distance of 100,000 ft per route, a max fleet of 1100 buses,
+# we calculated the optimal speeds per route using convex optimization.
+# The congestion coefficient was negligible, and it was infeasible to
+# calculate the actual headway (waiting time between buses) per bus. Thus, 
+# we assumed the average headway to be 5 minutes across the board.
+# After performing the convex optimization, we found that some buses are constrained
+# by the max speed while others are relegated to the min speed.
+# This is a corner solution by the convex optimization algorithm.
+# However, it shows insights into the bus routing problem in that
+# Several bus routes's efficiencies are constrained by a max speed threshold
+# It would be beneficial to look into how increasing the fleet capacity
+# for those specific routes or even adjusting headway leeway may serve to
+# improve bus services.
+# The plot of the current vs. optimized speeds given these idealized
+# constraints can be found in the bus_speeds.html file, which is produced
+# by the code in this file.
+
+# Choice of variables
+
+# We used the dwell time (time for a bus to wait at a stop) to approximate
+# the passenger capacity with the assumption that the average person takes 3
+# seconds to board the bus.
+# It was virtually impossible to calculate the average headway per stop per route
+# as the entries in the database do not distinguish between buses, and it's
+# impossible to know which entries "chain" together to form the whole route.
+# This is why we just assumed the average headway to be 5 minutes.
+# We attempted to calculate the congestion coefficient by fitting a functional
+# relationship between headway and average speed. Since we were unable to
+# calculate headway, it doesn't make sense to include another variable
+# that depends on it. So, in the final computation, we excluded the congestion
+# coefficient.
