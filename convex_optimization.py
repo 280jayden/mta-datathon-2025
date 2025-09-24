@@ -133,7 +133,7 @@ def calculate():
     plt.xticks(rotation=45)
     
     html_str = mpld3.fig_to_html(fig)
-    with open("data/bus_speeds.html", "w") as f:
+    with open("bus_speeds.html", "w") as f:
         f.write(html_str)
 
     print("Plot saved to bus_speeds.html")
