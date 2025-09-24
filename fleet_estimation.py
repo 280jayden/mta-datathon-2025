@@ -68,7 +68,7 @@ print("Total active fleet size: ", total_fleet_size)
 # total_fleet_size / 300 respective active fleet counts per day since
 # 11/21/24.
 # The lower bound for the active fleet size is about 
-# 320,000 buses / 300 days = ~1000 active buses per day. 
+# 320,000 buses / 300 days = ~1100 active buses per day. 
 # According to the MTA webpage, their active fleet is 5700 buses,
 # which makes sense with our number considering they would include
 # extra buses for maintenance and repair purposes while our estimate
