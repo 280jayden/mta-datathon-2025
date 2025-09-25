@@ -183,7 +183,7 @@ def DiD():
     # This was calculated at a p-value = 1e-114 << 0.05, so this is statistically
     # significant to conclude that there was an increase in violations
     # after the ACE camera enforcement. Maybe just due to the increase
-    # cameras, more violations were reported, which means there would
+    # cameras, more violations were reported, which means there would be
     # survivorship bias.
 
 if __name__ == "__main__":
